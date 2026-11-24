@@ -140,12 +140,19 @@ function Home({ wallet, trip }: { wallet: Wallet; trip: Trip }) {
           .reduce((sum, expense) => sum + expenseValue(expense, currency), 0);
         const limit = category.limitCents === undefined ? undefined
           : category.limitCents / 100 * (currency === 'JPY' ? trip.rate : 1);
-        const remaining = limit === undefined ? undefined : period === 'trip' ? limit - categorySpent
-          : daysLeft ? (limit - categoryBeforeToday) / daysLeft - categorySpent : undefined;
+        const dailyLimit = limit !== undefined && daysLeft > 0
+          ? Math.max(0, limit - categoryBeforeToday) / daysLeft : undefined;
+        const periodLimit = period === 'trip' ? limit : dailyLimit;
+        const remaining = periodLimit === undefined ? undefined : periodLimit - categorySpent;
         return <li key={category.id}>
           <span class="category-mark">{category.name.slice(0, 1).toUpperCase()}</span>
           <div class="row-main"><b>{category.name}</b>
-            {remaining !== undefined && <small>Quedan {money(remaining, currency)}</small>}</div>
+            {period === 'today' && dailyLimit !== undefined &&
+              <small>Máximo de hoy · {money(dailyLimit, currency)}</small>}
+            {remaining !== undefined && <small>
+              {remaining < 0 ? 'Excedido' : period === 'today' ? 'Quedan hoy' : 'Quedan'}
+              {' '}{money(Math.abs(remaining), currency)}
+            </small>}</div>
           <b>{money(categorySpent, currency)}</b>
           {!category.archived && <a class="button square" href={'#/gasto?category=' + encodeURIComponent(category.id)}
             aria-label={'Cargar gasto en ' + category.name}>+</a>}
@@ -367,7 +374,7 @@ function CategoryForm({ category, mutate }: { category?: Category; mutate: Mutat
   }
   return <form class="category-form" onSubmit={submit}>
     <Field label="Nombre" name="name" defaultValue={category?.name} maxLength={40} />
-    <Amount label="Límite (USD)" name="limit" min="0" required={false}
+    <Amount label="Límite del viaje (USD)" name="limit" min="0" required={false}
       defaultValue={category?.limitCents === undefined ? undefined : category.limitCents / 100} />
     <div class="category-tools">
       {archived && <small>Archivada</small>}
