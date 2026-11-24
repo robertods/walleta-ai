@@ -61,8 +61,6 @@ main { padding-top: 1.4rem; padding-bottom: calc(6.2rem + env(safe-area-inset-bo
 .cash .panel { padding: .75rem; }
 .cash span { font-size: .875rem; color: var(--muted); }
 .cash strong, .calculation output { display: block; font-size: 1.25rem; overflow-wrap: anywhere; }
-.section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
-.section-heading a { display: inline-flex; align-items: center; min-height: 44px; }
 .ledger { list-style: none; padding: 0; margin: 0; }
 .ledger li { display: flex; align-items: center; gap: .55rem; padding: .55rem .65rem; min-height: 62px; }
 .ledger li + li { border-top: 1px solid var(--line); }
@@ -76,8 +74,8 @@ main { padding-top: 1.4rem; padding-bottom: calc(6.2rem + env(safe-area-inset-bo
   background: white; border-top: 1px solid var(--line);
   padding: .35rem .4rem calc(.35rem + env(safe-area-inset-bottom)); z-index: 1;
 }
-.bottom a { flex: 1; max-width: 12rem; text-decoration: none; text-align: center; color: var(--accent-text);
-  padding: .25rem .15rem; border-radius: .65rem; font-size: .875rem; line-height: 1.25; }
+.bottom a { flex: 1; min-width: 0; min-height: 44px; max-width: 12rem; text-decoration: none; text-align: center; color: var(--accent-text);
+  padding: .25rem .1rem; border-radius: .65rem; font-size: clamp(.75rem, 3.7vw, .875rem); line-height: 1.25; }
 .bottom span { display: block; font-size: 1.25rem; font-weight: 750; }
 .bottom .new, .primary { background: var(--accent); color: white; border-color: var(--accent); }
 .back { display: inline-flex; align-items: center; min-height: 44px; }

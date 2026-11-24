@@ -41,7 +41,19 @@ export interface Wallet {
   exchanges: Exchange[];
 }
 
-const defaultCategories = ['Comida', 'Ropa', 'Chucherías', 'Transporte', 'Hospedaje', 'Entradas', 'Otros'];
+const defaultCategories: Record<string, { name: string; emoji: string }> = {
+  '0': { name: 'Comida', emoji: '🍜' },
+  '1': { name: 'Ropa', emoji: '👕' },
+  '2': { name: 'Chucherías', emoji: '🎁' },
+  '3': { name: 'Transporte', emoji: '🚆' },
+  '4': { name: 'Hospedaje', emoji: '🏨' },
+  '5': { name: 'Entradas', emoji: '🎟️' },
+  '6': { name: 'Otros', emoji: '📦' },
+};
+
+export function categoryEmoji(id: string) {
+  return defaultCategories[id]?.emoji ?? '🏷️';
+}
 let connection: ReturnType<typeof openDB<WalletaDB>> | undefined;
 
 function database() {
@@ -79,8 +91,8 @@ export async function saveTrip(profile: Profile, trip: Trip, first: boolean) {
   const tx = db.transaction(['profile', 'trips', 'categories'], 'readwrite');
   const writes = [tx.objectStore('profile').put(profile), tx.objectStore('trips').put(trip)];
   if (first) {
-    defaultCategories.forEach((name, index) => {
-      writes.push(tx.objectStore('categories').put({ id: String(index), name }));
+    Object.entries(defaultCategories).forEach(([id, { name }]) => {
+      writes.push(tx.objectStore('categories').put({ id, name }));
     });
   }
   await Promise.all([...writes, tx.done]);

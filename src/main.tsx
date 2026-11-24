@@ -1,7 +1,7 @@
 import { render, type JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import {
-  readWallet, remove, removeCategory, saveCategory, saveExchange, saveExpense, saveTrip,
+  categoryEmoji, readWallet, remove, removeCategory, saveCategory, saveExchange, saveExpense, saveTrip,
   type Category, type Currency, type Exchange, type Expense, type Trip, type Wallet,
 } from './data';
 import { daysBetween, estimate, expenseValue, formatDate, localDate, minorUnits, money, priceEquivalents, walletBalances } from './money';
@@ -59,7 +59,7 @@ function TripForm({ wallet, mutate }: { wallet: Wallet; mutate: Mutation }) {
     if (!name || end < start || !Number.isSafeInteger(budgetCents) || budgetCents < 1 ||
       !Number.isFinite(rate) || rate <= 0 ||
       (arsPerUsd !== undefined && (!Number.isFinite(arsPerUsd) || arsPerUsd <= 0))) {
-      setError('Revisá el nombre, las fechas, el presupuesto y las cotizaciones.');
+      setError('Revisá el nombre, las fechas, el presupuesto y los rates.');
       return;
     }
     setError('');
@@ -78,8 +78,8 @@ function TripForm({ wallet, mutate }: { wallet: Wallet; mutate: Mutation }) {
       <Field label="Fin" name="end" type="date" min={start} defaultValue={trip?.end ?? start} />
     </div>
     <Amount label="Presupuesto inicial (USD)" name="budget" defaultValue={trip && trip.budgetCents / 100} />
-    <Amount label="Cotización de referencia (JPY por USD)" name="rate" step="any" defaultValue={trip?.rate} />
-    <Amount label="Cotización en pesos argentinos (ARS por USD)" name="arsPerUsd"
+    <Amount label="Rate (JPY por USD)" name="rate" step="any" defaultValue={trip?.rate} />
+    <Amount label="Rate (ARS por USD)" name="arsPerUsd"
       step="any" required={false} defaultValue={trip?.arsPerUsd} />
     {error && <p role="alert" class="error">{error}</p>}
     <button class="primary">{trip ? 'Guardar configuración' : 'Crear viaje'}</button>
@@ -131,7 +131,7 @@ function Home({ wallet, trip }: { wallet: Wallet; trip: Trip }) {
       <div class="panel"><span>Efectivo en yenes</span><strong>{money(balance.yen, 'JPY')}</strong></div>
       <div class="panel"><span>Efectivo en USD</span><strong>{money(balance.usd, 'USD')}</strong></div>
     </div>
-    <div class="section-heading"><h2>Categorías</h2><a href="#/historial">Ver historial</a></div>
+    <h2>Categorías</h2>
     <ul class="panel ledger">
       {wallet.categories.filter(category => !category.archived ||
         shown.some(expense => expense.categoryId === category.id)).map(category => {
@@ -146,7 +146,7 @@ function Home({ wallet, trip }: { wallet: Wallet; trip: Trip }) {
         const periodLimit = period === 'trip' ? limit : dailyLimit;
         const remaining = periodLimit === undefined ? undefined : periodLimit - categorySpent;
         return <li key={category.id}>
-          <span class="category-mark">{category.name.slice(0, 1).toUpperCase()}</span>
+          <span class="category-mark" aria-hidden="true">{categoryEmoji(category.id)}</span>
           <div class="row-main"><b>{category.name}</b>
             {period === 'today' && dailyLimit !== undefined &&
               <small>Máximo de hoy · {money(dailyLimit, currency)}</small>}
@@ -161,8 +161,9 @@ function Home({ wallet, trip }: { wallet: Wallet; trip: Trip }) {
       })}
     </ul>
     <nav class="bottom" aria-label="Acciones del viaje">
-      <a href="#/calculadora"><span aria-hidden="true">÷</span>Calculadora</a>
-      <a href="#/cambio"><span aria-hidden="true">¥</span>Comprar yenes</a>
+      <a href="#/calculadora"><span aria-hidden="true">🧮</span>Calculadora</a>
+      <a href="#/cambio"><span aria-hidden="true">💵💴</span>Cambio</a>
+      <a href="#/historial"><span aria-hidden="true">🕒</span>Historial</a>
       <a href="#/gasto" class="new"><span aria-hidden="true">+</span>Nuevo gasto</a>
     </nav>
   </>;
@@ -232,7 +233,7 @@ function ExchangeForm({ trip, exchange, mutate }: { trip: Trip; exchange?: Excha
     const usdCents = minorUnits(numberValue(data, 'usd'), 'USD');
     if (!Number.isSafeInteger(usdCents) || usdCents <= 0 || !Number.isSafeInteger(Number(yen)) ||
       Number(yen) <= 0 || !Number.isFinite(Number(rate)) || Number(rate) <= 0) {
-      setError('Revisá los yenes recibidos, la cotización y los dólares entregados.');
+      setError('Revisá los yenes recibidos, el rate y los dólares entregados.');
       return;
     }
     void mutate(() => saveExchange({
@@ -240,11 +241,11 @@ function ExchangeForm({ trip, exchange, mutate }: { trip: Trip; exchange?: Excha
     }), exchange ? '/historial?tipo=cambios' : '/');
   }
   return <>
-    <Title>{exchange ? 'Editar compra' : 'Comprar yenes'}</Title>
+    <Title>{exchange ? 'Editar cambio' : 'Cambio'}</Title>
     <form class="panel form" onSubmit={submit}>
       <Amount label="Yenes recibidos (JPY)" min="1" step="1" inputMode="numeric" value={yen}
         onInput={event => { setYen(event.currentTarget.value); setOverride(undefined); }} />
-      <Amount label="Cotización de la operación (JPY por USD)" value={rate} step="any"
+      <Amount label="Rate (JPY por USD)" value={rate} step="any"
         onInput={event => { setRate(event.currentTarget.value); setOverride(undefined); }} />
       <Amount label="Dólares entregados (USD)" name="usd"
         value={override ?? (calculated > 0 && Number.isSafeInteger(calculated) ? (calculated / 100).toFixed(2) : '')}
@@ -252,9 +253,9 @@ function ExchangeForm({ trip, exchange, mutate }: { trip: Trip; exchange?: Excha
       <p class="muted">Ajustá los dólares entregados si hubo una comisión o un redondeo.</p>
       <Field label="Fecha" name="date" type="date" defaultValue={exchange?.date ?? localDate(trip.timeZone)} />
       {error && <p role="alert" class="error">{error}</p>}
-      <button class="primary">Guardar compra</button>
+      <button class="primary">Guardar cambio</button>
     </form>
-    <p><a href="#/historial?tipo=cambios">Ver compras de yenes</a></p>
+    <p><a href="#/historial?tipo=cambios">Ver cambios</a></p>
   </>;
 }
 
@@ -286,7 +287,7 @@ function Calculator({ trip }: { trip: Trip }) {
         <output>{show(equivalents.ars, 'ARS')}</output></div>
       <p class="muted">1 USD = {rateFormat.format(trip.rate)} JPY
         {trip.arsPerUsd !== undefined && <> · {rateFormat.format(trip.arsPerUsd)} ARS</>}</p>
-      {trip.arsPerUsd === undefined && <p><a href="#/config">Configurá la cotización en ARS para ver el equivalente.</a></p>}
+      {trip.arsPerUsd === undefined && <p><a href="#/config">Configurá el rate en ARS para ver el equivalente.</a></p>}
     </section>
   </>;
 }
@@ -317,7 +318,7 @@ function History({ wallet, exchanges, mutate }: { wallet: Wallet; exchanges: boo
     <div class="history-tools">
       <nav class="segments" aria-label="Tipo de movimiento">
         <a href="#/historial" aria-current={!exchanges ? 'page' : undefined}>Gastos</a>
-        <a href="#/historial?tipo=cambios" aria-current={exchanges ? 'page' : undefined}>Compras de yenes</a>
+        <a href="#/historial?tipo=cambios" aria-current={exchanges ? 'page' : undefined}>Cambios</a>
       </nav>
       <button class="secondary" disabled={exporting} onClick={() => void exportExcel()}>
         {exporting ? 'Exportando…' : 'Exportar Excel'}
