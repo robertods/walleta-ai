@@ -456,7 +456,7 @@ function App() {
 
   return <>
     <header class="top"><div><a href="#/" class="brand">
-      <img src={import.meta.env.BASE_URL + 'icon-192.png'} width="30" height="30" alt="" />
+      <img src={import.meta.env.BASE_URL + 'logo.png'} width="30" height="30" alt="" />
       Walleta
     </a>
       {trip && <span class="top-trip">Viaje a Japón</span>}</div></header>
