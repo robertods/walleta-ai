@@ -4,7 +4,7 @@ import {
   readWallet, remove, removeCategory, saveCategory, saveExchange, saveExpense, saveTrip,
   type Category, type Currency, type Exchange, type Expense, type Trip, type Wallet,
 } from './data';
-import { daysBetween, estimate, expenseValue, formatDate, localDate, minorUnits, money, walletBalances } from './money';
+import { daysBetween, estimate, expenseValue, formatDate, localDate, minorUnits, money, priceEquivalents, walletBalances } from './money';
 import { InviteGate } from './invite';
 import './style.css';
 
@@ -52,15 +52,18 @@ function TripForm({ wallet, mutate }: { wallet: Wallet; mutate: Mutation }) {
     const name = value(data, 'name');
     const budgetCents = minorUnits(numberValue(data, 'budget'), 'USD');
     const rate = numberValue(data, 'rate');
+    const arsRateInput = value(data, 'arsPerUsd');
+    const arsPerUsd = arsRateInput ? Number(arsRateInput) : undefined;
     const end = value(data, 'end');
     if (!name || end < start || !Number.isSafeInteger(budgetCents) || budgetCents < 1 ||
-      !Number.isFinite(rate) || rate <= 0) {
-      setError('Revisá el nombre, las fechas, el presupuesto y la cotización.');
+      !Number.isFinite(rate) || rate <= 0 ||
+      (arsPerUsd !== undefined && (!Number.isFinite(arsPerUsd) || arsPerUsd <= 0))) {
+      setError('Revisá el nombre, las fechas, el presupuesto y las cotizaciones.');
       return;
     }
     setError('');
     void mutate(() => saveTrip({ id: 'local', name }, {
-      id: 'active', start, end, budgetCents, rate,
+      id: 'active', start, end, budgetCents, rate, arsPerUsd,
       origin: 'Argentina', destination: 'Japón', timeZone: 'Asia/Tokyo',
       baseCurrency: 'USD', localCurrency: 'JPY',
     }, !trip), '/');
@@ -75,6 +78,8 @@ function TripForm({ wallet, mutate }: { wallet: Wallet; mutate: Mutation }) {
     </div>
     <Amount label="Presupuesto inicial (USD)" name="budget" defaultValue={trip && trip.budgetCents / 100} />
     <Amount label="Cotización de referencia (JPY por USD)" name="rate" step="any" defaultValue={trip?.rate} />
+    <Amount label="Cotización en pesos argentinos (ARS por USD)" name="arsPerUsd"
+      step="any" required={false} defaultValue={trip?.arsPerUsd} />
     {error && <p role="alert" class="error">{error}</p>}
     <button class="primary">{trip ? 'Guardar configuración' : 'Crear viaje'}</button>
   </form>;
@@ -249,7 +254,13 @@ function Calculator({ trip }: { trip: Trip }) {
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState<Currency>('JPY');
   const target = currency === 'JPY' ? 'USD' : 'JPY';
-  const converted = target === 'USD' ? Number(amount) / trip.rate : Number(amount) * trip.rate;
+  const price = Number(amount);
+  const equivalents = priceEquivalents(price, currency, trip);
+  const converted = target === 'USD' ? equivalents.usd : equivalents.yen;
+  const hasPrice = amount !== '' && Number.isFinite(price) && price >= 0;
+  const show = (value: number | undefined, unit: Currency | 'ARS') =>
+    hasPrice && value !== undefined && Number.isFinite(value) ? money(value, unit) : '—';
+  const rateFormat = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 10 });
   return <>
     <Title>Calculadora</Title>
     <section class="panel form">
@@ -262,8 +273,12 @@ function Calculator({ trip }: { trip: Trip }) {
         </select></label>
       </div>
       <div class="calculation"><span>Equivalente en {target}</span>
-        <output>{amount && Number(amount) >= 0 && Number.isFinite(converted) ? money(converted, target) : '—'}</output></div>
-      <p class="muted">1 USD = {new Intl.NumberFormat('es-AR').format(trip.rate)} JPY</p>
+        <output>{show(converted, target)}</output></div>
+      <div class="calculation"><span>Equivalente en ARS</span>
+        <output>{show(equivalents.ars, 'ARS')}</output></div>
+      <p class="muted">1 USD = {rateFormat.format(trip.rate)} JPY
+        {trip.arsPerUsd !== undefined && <> · {rateFormat.format(trip.arsPerUsd)} ARS</>}</p>
+      {trip.arsPerUsd === undefined && <p><a href="#/config">Configurá la cotización en ARS para ver el equivalente.</a></p>}
     </section>
   </>;
 }

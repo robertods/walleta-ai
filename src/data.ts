@@ -13,6 +13,7 @@ export interface Trip {
   end: string;
   budgetCents: number;
   rate: number;
+  arsPerUsd?: number;
 }
 export interface Category { id: string; name: string; archived?: boolean; limitCents?: number }
 export interface Expense {

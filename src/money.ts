@@ -13,9 +13,16 @@ export function daysBetween(start: string, end: string) {
   return (Date.parse(end) - Date.parse(start)) / dayMs;
 }
 
-export function money(value: number, currency: Currency) {
+export function money(value: number, currency: Currency | 'ARS') {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency, currencyDisplay: 'narrowSymbol' })
     .format(value);
+}
+
+export function priceEquivalents(price: number, currency: Currency, rates: Pick<Trip, 'rate' | 'arsPerUsd'>) {
+  const usd = currency === 'JPY' ? price / rates.rate : price;
+  const yen = currency === 'USD' ? price * rates.rate : price;
+  const ars = rates.arsPerUsd === undefined ? undefined : usd * rates.arsPerUsd;
+  return { usd, yen, ars };
 }
 
 export function formatDate(date: string) {
