@@ -44,11 +44,11 @@ export interface Wallet {
 const defaultCategories: Record<string, { name: string; emoji: string }> = {
   '0': { name: 'Comida', emoji: '🍜' },
   '1': { name: 'Ropa', emoji: '👕' },
-  '2': { name: 'Chucherías', emoji: '🎁' },
+  '2': { name: 'Chucherías', emoji: '🧸' },
   '3': { name: 'Transporte', emoji: '🚆' },
   '4': { name: 'Hospedaje', emoji: '🏨' },
   '5': { name: 'Entradas', emoji: '🎟️' },
-  '6': { name: 'Otros', emoji: '📦' },
+  '6': { name: 'Otros', emoji: '🎁' },
 };
 
 export function categoryEmoji(id: string) {

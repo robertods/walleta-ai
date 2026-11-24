@@ -161,8 +161,8 @@ function Home({ wallet, trip }: { wallet: Wallet; trip: Trip }) {
       })}
     </ul>
     <nav class="bottom" aria-label="Acciones del viaje">
-      <a href="#/calculadora"><span aria-hidden="true">🧮</span>Calculadora</a>
-      <a href="#/cambio"><span aria-hidden="true">💵💴</span>Cambio</a>
+      <a href="#/calculadora"><span class="calculator-symbol" aria-hidden="true"></span>Calculadora</a>
+      <a href="#/cambio"><span class="exchange-symbol" aria-hidden="true">💵→💴</span>Cambio</a>
       <a href="#/historial"><span aria-hidden="true">🕒</span>Historial</a>
       <a href="#/gasto" class="new"><span aria-hidden="true">+</span>Nuevo gasto</a>
     </nav>
