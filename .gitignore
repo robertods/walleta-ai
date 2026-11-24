@@ -3,3 +3,4 @@
 /dist/
 /.env.local
 /CODIGO-WALLETA.txt
+.DS_Store
