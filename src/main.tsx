@@ -455,7 +455,10 @@ function App() {
   else page = <Home wallet={wallet} trip={trip} />;
 
   return <>
-    <header class="top"><div><a href="#/" class="brand"><span aria-hidden="true">W</span>Walleta</a>
+    <header class="top"><div><a href="#/" class="brand">
+      <img src={import.meta.env.BASE_URL + 'icon-192.png'} width="30" height="30" alt="" />
+      Walleta
+    </a>
       {trip && <span class="top-trip">Viaje a Japón</span>}</div></header>
     <main aria-busy={busy}>{error && <p class="error panel" role="alert">{error}</p>}
       {busy && <p class="saving" role="status">Guardando…</p>}{page}</main>

@@ -32,7 +32,7 @@ h2 { line-height: 1.2; font-size: 1.25rem; margin: 1.6rem 0 .8rem; }
 .top > div, main { max-width: 52rem; margin: auto; padding-inline: clamp(.85rem, 4vw, 2rem); }
 .top > div { display: flex; align-items: center; justify-content: space-between; min-height: 62px; gap: .7rem; }
 .brand { display: inline-flex; gap: .55rem; align-items: center; color: var(--accent); text-decoration: none; font-size: 1.25rem; font-weight: 780; }
-.brand span { background: var(--accent); color: white; width: 30px; height: 30px; border-radius: .55rem; display: grid; place-items: center; font-size: 1rem; }
+.brand img { display: block; border-radius: .55rem; }
 .top-trip, .muted, small { color: var(--muted); }
 .top-trip, .eyebrow, small { font-size: .875rem; }
 main { padding-top: 1.4rem; padding-bottom: calc(6.2rem + env(safe-area-inset-bottom)); }
