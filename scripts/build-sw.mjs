@@ -26,6 +26,12 @@ self.addEventListener('install', event => {
   )));
 });
 
+self.addEventListener('message', event => {
+  if (event.data === 'WALLETA_ACTIVATE_UPDATE') {
+    event.waitUntil(self.skipWaiting());
+  }
+});
+
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const names = await caches.keys();

@@ -6,6 +6,7 @@ import {
 } from './data';
 import { daysBetween, estimate, expenseValue, formatDate, localDate, minorUnits, money, priceEquivalents, walletBalances } from './money';
 import { InviteGate } from './invite';
+import { UpdateNotice } from './update';
 import './style.css';
 
 type SubmitEvent = Parameters<NonNullable<JSX.IntrinsicElements['form']['onSubmit']>>[0];
@@ -461,8 +462,7 @@ function App() {
   </>;
 }
 
-render(<InviteGate><App /></InviteGate>, document.getElementById('app')!);
-
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(error => console.error('Walleta: caché offline', error));
-}
+render(<>
+  <InviteGate><App /></InviteGate>
+  {import.meta.env.PROD && 'serviceWorker' in navigator && <UpdateNotice />}
+</>, document.getElementById('app')!);
