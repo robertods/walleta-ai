@@ -1,0 +1,32 @@
+{
+  "name": "walleta-ai",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "vite",
+    "check": "tsc --noEmit",
+    "build": "npm run check && vite build && node scripts/build-sw.mjs",
+    "preview": "vite preview",
+    "invite": "node scripts/create-invite.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robertods/walleta-ai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/robertods/walleta-ai/issues"
+  },
+  "homepage": "https://github.com/robertods/walleta-ai#readme",
+  "private": true,
+  "dependencies": {
+    "idb": "^8.0.4",
+    "preact": "^11.2.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}
